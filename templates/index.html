@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversor de Archivos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Conversor PDF/Word/PowerPoint/Excel</h1>
+
+        <form id="convertForm" enctype="multipart/form-data">
+            <input type="file" name="file" multiple required>
+            <select name="target_format" required>
+                <option value="pdf">PDF</option>
+                <option value="docx">Word</option>
+                <option value="pptx">PowerPoint</option>
+                <option value="xlsx">Excel</option>
+            </select>
+            <button type="submit">Convertir</button>
+        </form>
+
+        <div id="downloads"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("convertForm");
+        const downloadsDiv = document.getElementById("downloads");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            downloadsDiv.innerHTML = "Convirtiendo... por favor espera";
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("/convert", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                downloadsDiv.innerHTML = "";
+
+                if (data.error) {
+                    downloadsDiv.textContent = "Error: " + data.error;
+                    return;
+                }
+
+                data.files.forEach(file => {
+                    const link = document.createElement("a");
+                    link.href = file.download_url;
+                    // Renombrar el archivo con el formato seleccionado
+                    link.download = file.original_filename.replace(/\.[^/.]+$/, "") + "." + formData.get("target_format");
+                    link.textContent = "Descargar " + file.original_filename;
+                    downloadsDiv.appendChild(link);
+
+                    // Descargar automáticamente
+                    link.click();
+                });
+
+            } catch (err) {
+                downloadsDiv.textContent = "Error: No se pudo completar la conversión.";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

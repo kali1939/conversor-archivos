@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos temporales
+*.swp
+.DS_Store
+
+# Archivos de subida temporal (si usas la carpeta uploads o temp)
+uploads/
+temp_*
